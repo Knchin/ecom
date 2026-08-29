@@ -31,8 +31,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: Approve build scripts
-        run: pnpm approve-builds esbuild unrs-resolver
+      - name: Configure pnpm allowed builds
+        run: |
+          pnpm config set allowed-builds esbuild unrs-resolver
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -46,7 +47,7 @@ jobs:
       - name: Run unit tests
         run: pnpm test
 
-      - name: Build packages
+      - name: Build common packages
         run: pnpm --filter="./packages/*" build
 
       - name: Build web
@@ -150,8 +151,9 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Approve build scripts
-        run: pnpm approve-builds esbuild unrs-resolver
+      - name: Configure pnpm allowed builds
+        run: |
+          pnpm config set allowed-builds esbuild unrs-resolver
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -159,7 +161,6 @@ jobs:
       - name: Build Android
         run: |
           echo "Android build not yet configured"
-          # Add Android build commands here when Android app is created
 
   build-ios:
     name: Build iOS
@@ -186,8 +187,9 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Approve build scripts
-        run: pnpm approve-builds esbuild unrs-resolver
+      - name: Configure pnpm allowed builds
+        run: |
+          pnpm config set allowed-builds esbuild unrs-resolver
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -195,4 +197,3 @@ jobs:
       - name: Build iOS
         run: |
           echo "iOS build not yet configured"
-          # Add iOS build commands here when iOS app is created
