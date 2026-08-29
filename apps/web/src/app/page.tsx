@@ -1,9 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { MapPin, Clock, Phone, Mail, WhatsApp, Truck, Sparkles, Tag, Package, ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@shop-platform/ui'
+import { Card, CardContent } from '@shop-platform/ui'
+import { Separator } from '@shop-platform/ui'
 import { ProductGrid } from '@/components/products/product-grid'
 import { CategoryGrid } from '@/components/categories/category-card'
 import { getCategories, getFeaturedProducts, getNewArrivals, getActivePromotions, getShopSettings, getOpeningHours } from '@/lib/data'
@@ -282,4 +282,4 @@ function formatTime(time: string): string {
   return `${displayHour}:${minutes} ${ampm}`
 }
 
-import { cn } from '@/lib/utils'
+import { cn } from '@shop-platform/ui'

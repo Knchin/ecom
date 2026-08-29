@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, WhatsApp } from 'lucide-react'
-import { getDayName } from '@/lib/utils'
+import { getDayName } from '@shop-platform/ui'
 import type { ShopSettings, OpeningHours } from '@/types/database'
 
 interface FooterProps {
@@ -120,4 +120,4 @@ function formatTime(time: string): string {
   return `${displayHour}:${minutes} ${ampm}`
 }
 
-import { cn } from '@/lib/utils'
+import { cn } from '@shop-platform/ui'

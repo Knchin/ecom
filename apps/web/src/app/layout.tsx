@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Toaster } from '@/components/ui/toaster'
+import { Toaster } from '@shop-platform/ui'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { getShopSettings, getOpeningHours } from '@/lib/data'

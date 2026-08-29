@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 import { ChevronDown, Filter, X, SlidersHorizontal } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@shop-platform/ui'
+import { Input } from '@shop-platform/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shop-platform/ui'
 import { ProductGrid } from '@/components/products/product-grid'
 import { CategoryGrid } from '@/components/categories/category-card'
 import { getCategories, getProducts } from '@/lib/data'
@@ -294,4 +294,4 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   )
 }
 
-import { cn } from '@/lib/utils'
+import { cn } from '@shop-platform/ui'

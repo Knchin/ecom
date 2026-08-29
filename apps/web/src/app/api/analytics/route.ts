@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { generateSessionId } from '@/lib/utils'
+import { generateSessionId } from '@shop-platform/ui'
 import type { AnalyticsEventType } from '@/types/database'
 
 export async function POST(request: NextRequest) {

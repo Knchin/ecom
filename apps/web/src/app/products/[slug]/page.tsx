@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin, Phone, WhatsApp, Share2, Truck, Tag, ChevronLeft, ChevronRight, X, Star, MapPin as MapPinIcon, Phone as PhoneIcon, MessageSquare, Navigation } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@shop-platform/ui'
+import { Card, CardContent } from '@shop-platform/ui'
+import { Separator } from '@shop-platform/ui'
 import { getProductBySlug, getCategories, getShopSettings, getOpeningHours } from '@/lib/data'
-import { formatPriceFromCents } from '@/lib/utils'
+import { formatPriceFromCents } from '@shop-platform/ui'
 import type { ProductWithRelations } from '@/types/database'
 
 interface ProductPageProps {
@@ -385,6 +385,6 @@ function formatTime(time: string): string {
   return `${displayHour}:${minutes} ${ampm}`
 }
 
-import { cn } from '@/lib/utils'
+import { cn } from '@shop-platform/ui'
 import { Clock } from 'lucide-react'
 import { Package } from 'lucide-react'

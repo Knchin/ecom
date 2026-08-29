@@ -1,7 +1,7 @@
 'use client'
 
 import { ProductCard } from './product-card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@shop-platform/ui/skeleton'
 import type { ProductWithRelations } from '@/types/database'
 
 interface ProductGridProps {

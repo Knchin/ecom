@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Tag, Truck, MapPin, Phone, Share2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn, formatPriceFromCents } from '@/lib/utils'
+import { Button } from '@shop-platform/ui'
+import { cn, formatPriceFromCents } from '@shop-platform/ui'
 import type { ProductWithRelations } from '@/types/database'
 
 interface ProductCardProps {

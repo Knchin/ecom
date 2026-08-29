@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import { Menu, X, Search, ShoppingBag, MapPin, Phone } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
-import { cn } from '@/lib/utils'
+import { Button } from '@shop-platform/ui'
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle } from '@shop-platform/ui/drawer'
+import { cn } from '@shop-platform/ui'
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
