@@ -1,0 +1,25 @@
+{
+  "name": "shop-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Small Local Shop Platform - V1",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm --filter web typecheck",
+    "test": "pnpm --filter web test",
+    "test:e2e": "pnpm --filter web test:e2e",
+    "supabase:start": "supabase start",
+    "supabase:reset": "supabase db reset",
+    "supabase:migration": "supabase migration new",
+    "supabase:push": "supabase db push"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@11.24.0",
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

@@ -1,0 +1,45 @@
+project_id = "local-shop"
+
+[db]
+  port = 54322
+  shadows = false
+  major_version = 17
+
+[api]
+  port = 54321
+  schemas = ["public", "storage", "graphql_public"]
+  extra_search_path = ["public", "extensions"]
+
+[auth]
+  enabled = true
+  site_url = "http://localhost:3000"
+  additional_redirect_urls = ["http://localhost:3000/**"]
+  jwt_expiry = 3600
+  refresh_token_rotation_enabled = true
+  session_timebox = 604800
+  mfa_max_enrolled_factors = 10
+  security_captcha_enabled = false
+  security_captcha_provider = "hcaptcha"
+  security_captcha_secret = ""
+  security_manual_linking_enabled = false
+  security_refresh_token_reuse_interval = 10
+  security_update_password_require_reauthentication = true
+  mailer_autoconfirm = true
+
+[storage]
+  enabled = true
+  file_size_limit = "50MiB"
+  upload_max_file_size = "50MiB"
+
+[functions]
+  enabled = false
+
+[realtime]
+  enabled = false
+
+[studio]
+  enabled = true
+  port = 54323
+
+[edge_runtime]
+  enabled = false
