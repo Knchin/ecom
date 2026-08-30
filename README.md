@@ -131,23 +131,25 @@ merge_request / push (any branch)            push to main
         ▼                                        ▼
    ┌─────────────┐                    ┌─────────────┐
    │  ci         │  ───────────────►  │  ci         │
-   └──────┬──────┘                    └──────┬──────┘
-          ▼                                  ▼
-   (validate + build only)          ┌──────────────────┐
+   └─────────────┘                    └──────┬──────┘
+   (install, build, typecheck, tests)       ▼
+                                    ┌──────────────────┐
+                                    │  cloudflare_deploy│
                                     │      main only   │
                                     └────────┬─────────┘
-                                      ┌──────┴──────┐
-                                      ▼             ▼
-                             supabase_deploy  cloudflare_deploy
+                                             ▼
+                                    build + deploy worker
 ```
 
 - **Pull requests / feature branches**: the `ci` job runs install (frozen
-  lockfile) → common packages build → typecheck → unit tests → OpenNext
-  Cloudflare worker build → `wrangler deploy --dry-run`. Broken code is caught
-  before merge; no deployments happen.
-- **`main` pushes**: once `ci` passes, `supabase_deploy` and `cloudflare_deploy`
-  run in parallel (tracked against the `production` environment). Deployments
-  never run from arbitrary branches.
+  lockfile) → common packages build → typecheck → unit tests. Broken code is
+  caught before merge; no deployments happen.
+- **`main` pushes**: once `ci` passes, `cloudflare_deploy` builds the OpenNext
+  worker from that commit and deploys it (tracked against the `production`
+  environment). Deployments never run from arbitrary branches.
+- **Supabase is not deployed by CI**: migrations are applied manually in the
+  Supabase SQL editor (or the Supabase Studio). No DB credentials are needed
+  in GitHub.
 
 ### Required repository variables
 
@@ -155,27 +157,25 @@ Configure these under Settings → Secrets and variables → Actions.
 
 Secrets (`secrets`):
 
-| Secret                        | Purpose                                        |
-| ----------------------------- | ---------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`        | Cloudflare token (Workers Scripts edit)        |
-| `SUPABASE_DB_PASSWORD`        | DB password for the Supabase project           |
-| `SUPABASE_PUBLISHABLE_KEY`    | Public publishable key (browser-safe)          |
-| `SUPABASE_ANON_KEY`           | Public anon key, fallback for the web build    |
+| Secret                         | Purpose                                        |
+| ------------------------------ | ---------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`         | Cloudflare token (Workers Scripts edit)        |
+| `SUPABASE_PUBLISHABLE_KEY`     | Public publishable key (browser-safe)          |
+| `SUPABASE_ANON_KEY`            | Public anon key, fallback for the web build    |
 
 Variables (`vars`):
 
-| Variable                | Purpose                                        |
-| ----------------------- | ---------------------------------------------- |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID                          |
-| `CLOUDFLARE_PROJECT_NAME` | Worker name (defaults to `shop-platform`)   |
-| `SUPABASE_PROJECT_ID`   | Supabase project reference (the slug)          |
-| `SUPABASE_PROJECT_REGION` | Pooler region, e.g. `us-east-1`            |
+| Variable                 | Purpose                                         |
+| ------------------------ | ----------------------------------------------- |
+| `CLOUDFLARE_ACCOUNT_ID`  | Cloudflare account ID                           |
+| `CLOUDFLARE_PROJECT_NAME`| Worker name (defaults to `shop-platform`)       |
+| `SUPABASE_PROJECT_ID`    | Supabase project reference (the slug in your dashboard URL) |
 
 Secrets never appear in the repository. The web build only receives the
 browser-safe `NEXT_PUBLIC_*` values, derived from `SUPABASE_PROJECT_ID` plus
-`SUPABASE_PUBLISHABLE_KEY`/`SUPABASE_ANON_KEY`. `SUPABASE_SERVICE_ROLE_SECRET` /
-`SUPABASE_SECRET_KEY` are server-only and must never be added to the variables
-consumed by the `ci` build job.
+`SUPABASE_PUBLISHABLE_KEY`/`SUPABASE_ANON_KEY`. `SUPABASE_SERVICE_ROLE_SECRET`,
+`SUPABASE_SECRET_KEY`, and `SUPABASE_DB_PASSWORD` are server-only and never
+used by the pipeline.
 
 ### Runner configuration
 
@@ -188,7 +188,7 @@ default cache keyed on `pnpm-lock.yaml`.
 `development` / `production` are not split into separate environments
 beyond the workflow rules above: PR/branch pipelines build and validate;
 only the `main` pipeline deploys to production (tracked via the
-`production` environment on both deploy jobs).
+`production` environment on the deploy job).
 
 ## Quality gates
 

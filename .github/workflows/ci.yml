@@ -11,12 +11,15 @@ env:
   PNPM_VERSION: '11.24.0'
 
 # Pipeline:
-#   push / PR → ci (install → common build → typecheck → tests → OpenNext web build → wrangler --dry-run)
-#   main push, after ci passes → supabase_deploy + cloudflare_deploy (in parallel)
+#   push / PR → ci (install → common build → typecheck → tests). Fast feedback only.
+#   main push, after ci passes → cloudflare_deploy (build worker from this commit → deploy).
+#
+# Supabase migrations are NOT deployed by CI: they are applied manually
+# in the Supabase SQL editor.
 
 jobs:
   ci:
-    name: Validate and build
+    name: Validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -45,45 +48,8 @@ jobs:
       - name: Run unit tests
         run: pnpm test
 
-      - name: Build Cloudflare worker
-        run: pnpm --filter=web build:cf
-        env:
-          # Public (browser-safe) variables, derived from repository secrets/vars.
-          NEXT_PUBLIC_SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_ID }}.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
-
-      - name: Validate worker bundle
-        run: cd apps/web && pnpm exec wrangler deploy --dry-run
-
-      - name: Upload web artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: opennext-worker
-          path: apps/web/.open-next
-          retention-days: 7
-
-  supabase_deploy:
-    name: Deploy Supabase
-    runs-on: ubuntu-latest
-    needs: ci
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: '2.114.0'
-
-      - name: Push database migrations
-        run: |
-          VURL="postgresql://postgres.${{ vars.SUPABASE_PROJECT_ID }}:${{ secrets.SUPABASE_DB_PASSWORD }}@aws-0-${{ vars.SUPABASE_PROJECT_REGION }}.pooler.supabase.com:6543/postgres"
-          supabase db push --db-url "$VURL"
-
   cloudflare_deploy:
-    name: Deploy to Cloudflare
+    name: Build and deploy to Cloudflare
     runs-on: ubuntu-latest
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -103,14 +69,24 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
+      - name: Verify required variables
+        run: |
+          [ -n "${{ vars.SUPABASE_PROJECT_ID }}" ] || { echo "::error::Missing 'SUPABASE_PROJECT_ID' repository variable"; exit 1; }
+          [ -n "${{ vars.CLOUDFLARE_ACCOUNT_ID }}" ] || { echo "::error::Missing 'CLOUDFLARE_ACCOUNT_ID' repository variable"; exit 1; }
+          [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] || { echo "::error::Missing 'CLOUDFLARE_API_TOKEN' repository secret"; exit 1; }
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download web artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: opennext-worker
-          path: apps/web/.open-next
+      - name: Build Cloudflare worker
+        run: pnpm --filter=web build:cf
+        env:
+          # Public (browser-safe) values only; no privileged Supabase keys here.
+          NEXT_PUBLIC_SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_ID }}.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
+
+      - name: Validate worker bundle
+        run: cd apps/web && pnpm exec wrangler deploy --dry-run
 
       - name: Deploy to Cloudflare Workers
         run: pnpm deploy:cf
