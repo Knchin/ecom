@@ -20,11 +20,13 @@ module.exports = [
       '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
       'react-hooks': require('eslint-plugin-react-hooks'),
       'react-refresh': require('eslint-plugin-react-refresh'),
+      import: require('eslint-plugin-import'),
     },
     rules: {
       ...require('eslint-config-next').rules,
       ...require('@typescript-eslint/eslint-plugin').configs.recommended.rules,
       ...require('eslint-plugin-react-hooks').configs.recommended.rules,
+      ...require('eslint-plugin-import').configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
