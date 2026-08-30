@@ -10,5 +10,9 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  // Deploy to the account's workers.dev subdomain.
+  // One-time setup required first: register a subdomain at
+  // https://dash.cloudflare.com/<account_id>/workers/onboarding
+  "workers_dev": true
 }
