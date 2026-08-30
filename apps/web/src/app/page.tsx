@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { MapPin, Clock, Phone, Mail, WhatsApp, Truck, Sparkles, Tag, Package, ArrowRight } from 'lucide-react'
+import { MapPin, Clock, Phone, Mail, MessageCircle, Truck, Sparkles, Tag, Package, ArrowRight } from 'lucide-react'
 import { Button } from '@shop-platform/ui'
 import { Card, CardContent } from '@shop-platform/ui'
 import { Separator } from '@shop-platform/ui'
@@ -222,7 +222,7 @@ export default async function HomePage() {
                 {shop?.whatsapp && (
                   <a href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 hover:text-foreground transition-colors">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <WhatsApp className="h-5 w-5" />
+                      <MessageCircle className="h-5 w-5" />
                     </div>
                     <div>
                       <h3 className="font-medium">WhatsApp</h3>

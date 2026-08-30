@@ -14,4 +14,4 @@ export type {
   AnalyticsEventType,
   ProductWithRelations,
   CategoryWithProducts,
-} from '@/types/database'
+} from './database'

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { MapPin, Phone, Mail, Clock, Facebook, Instagram, WhatsApp } from 'lucide-react'
+import { MapPin, Phone, Mail, Clock, Facebook, Instagram, MessageCircle } from 'lucide-react'
 import { getDayName } from '@shop-platform/ui'
 import type { ShopSettings, OpeningHours } from '@/types/database'
 
@@ -65,7 +65,7 @@ export function Footer({ shop, hours }: FooterProps) {
               )}
               {shop?.whatsapp && (
                 <a href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-foreground transition-colors">
-                  <WhatsApp className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                  <MessageCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                   <span>WhatsApp</span>
                 </a>
               )}

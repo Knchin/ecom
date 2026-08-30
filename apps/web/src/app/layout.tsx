@@ -56,6 +56,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
 }
 
+
 export default async function RootLayout({
   children,
 }: {

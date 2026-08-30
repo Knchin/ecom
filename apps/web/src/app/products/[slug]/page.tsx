@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin, Phone, WhatsApp, Share2, Truck, Tag, ChevronLeft, ChevronRight, X, Star, MapPin as MapPinIcon, Phone as PhoneIcon, MessageSquare, Navigation } from 'lucide-react'
+import { MapPin, Phone, MessageCircle, Share2, Truck, Tag, ChevronLeft, ChevronRight, X, Star, MapPin as MapPinIcon, Phone as PhoneIcon, MessageSquare, Navigation } from 'lucide-react'
 import { Button } from '@shop-platform/ui'
 import { Card, CardContent } from '@shop-platform/ui'
 import { Separator } from '@shop-platform/ui'
@@ -34,11 +34,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     openGraph: {
       title: product.title,
       description: product.description ?? `View ${product.title} at Local Shop`,
-      type: 'product',
-      price: {
-        amount: displayPrice / 100,
-        currency: 'USD',
-      },
+      type: 'website',
       images: product.images[0] ? [`/api/images/${product.images[0].storage_path}`] : [],
     },
     twitter: {

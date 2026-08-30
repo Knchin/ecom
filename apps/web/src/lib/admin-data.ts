@@ -227,13 +227,16 @@ export async function adminGetPromotionWithProducts(promotionId: string): Promis
     throw promoError
   }
 
-  const { data: products, error: prodError } = await supabase
-    .from('products')
-    .select('*')
-    .in('id', supabase
+  const { data: promoProducts } = await supabase
       .from('promotion_products')
       .select('product_id')
-      .eq('promotion_id', promotionId))
+      .eq('promotion_id', promotionId)
+    const productIds = promoProducts?.map(p => p.product_id) ?? []
+
+    const { data: products, error: prodError } = await supabase
+      .from('products')
+      .select('*')
+      .in('id', productIds.length > 0 ? productIds : ['00000000-0000-0000-0000-000000000000'])
 
   if (prodError) throw prodError
 

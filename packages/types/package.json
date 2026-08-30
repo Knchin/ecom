@@ -2,8 +2,8 @@
   "name": "@shop-platform/types",
   "version": "1.0.0",
   "private": true,
-  "main": "./dist/index.ts",
-  "types": "./dist/index.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

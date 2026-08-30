@@ -3,9 +3,7 @@
 import Link from 'next/link'
 import { Menu, X, Search, ShoppingBag, MapPin, Phone } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '@shop-platform/ui'
-import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle } from '@shop-platform/ui/drawer'
-import { cn } from '@shop-platform/ui'
+import { Button, Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, cn } from '@shop-platform/ui'
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -82,7 +80,7 @@ export function Header() {
 
 function SearchDrawer({ onClose }: { onClose: () => void }) {
   return (
-    <Drawer open={true} onOpenChange={onClose} direction="down">
+    <Drawer open={true} onOpenChange={onClose} direction="bottom">
       <DrawerContent className="h-auto max-h-[60vh]">
         <DrawerHeader>
           <DrawerTitle>Search Products</DrawerTitle>

@@ -3,6 +3,8 @@ import { ChevronDown, Filter, X, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@shop-platform/ui'
 import { Input } from '@shop-platform/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shop-platform/ui'
+import { Separator } from '@shop-platform/ui'
+import { cn } from '@shop-platform/ui'
 import { ProductGrid } from '@/components/products/product-grid'
 import { CategoryGrid } from '@/components/categories/category-card'
 import { getCategories, getProducts } from '@/lib/data'
@@ -134,7 +136,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 <h2 className="text-sm font-semibold uppercase tracking-wider mb-3">Availability</h2>
                 <Select
                   value={params.availability ?? 'all'}
-                  onValueChange={value => {
+                  onValueChange={(value: string) => {
                     const url = new URL(window.location.href)
                     if (value === 'all') url.searchParams.delete('availability')
                     else url.searchParams.set('availability', value)
@@ -231,7 +233,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 <h2 className="text-sm font-semibold uppercase tracking-wider mb-3">Sort By</h2>
                 <Select
                   value={params.sort ?? 'created_at_desc'}
-                  onValueChange={value => {
+                  onValueChange={(value: string) => {
                     const url = new URL(window.location.href)
                     url.searchParams.set('sort', value)
                     url.searchParams.delete('page')
@@ -293,5 +295,3 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     </div>
   )
 }
-
-import { cn } from '@shop-platform/ui'

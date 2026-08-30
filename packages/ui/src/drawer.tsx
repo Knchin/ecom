@@ -1,10 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import * as DrawerPrimitive from 'vaul'
-import { cn } from '@/lib/utils'
+import { Drawer as DrawerPrimitive } from 'vaul'
+import { cn } from './utils'
 
-const Drawer = ({ children, ...props }: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Root>) => (
+const Drawer = ({ children, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
   <DrawerPrimitive.Root {...props}>{children}</DrawerPrimitive.Root>
 )
 
@@ -28,14 +28,16 @@ const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
-  <DrawerOverlay />
-  <DrawerPrimitive.Content
-    ref={ref}
-    className={cn('fixed inset-x-0 bottom-0 z-50 mt-auto flex flex-col rounded-t-[10px] border bg-background shadow-lg duration-200', className)}
-    {...props}
-  >
-    {children}
-  </DrawerPrimitive.Content>
+  <DrawerPrimitive.Portal>
+    <DrawerOverlay />
+    <DrawerPrimitive.Content
+      ref={ref}
+      className={cn('fixed inset-x-0 bottom-0 z-50 mt-auto flex flex-col rounded-t-[10px] border bg-background shadow-lg duration-200', className)}
+      {...props}
+    >
+      {children}
+    </DrawerPrimitive.Content>
+  </DrawerPrimitive.Portal>
 ))
 DrawerContent.displayName = DrawerPrimitive.Content.displayName
 

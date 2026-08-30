@@ -137,10 +137,16 @@ export async function getProducts(params: {
   }
 
   if (params.promotionId) {
-    query = query.in('id', supabase
+    const { data: promoProducts } = await supabase
       .from('promotion_products')
       .select('product_id')
-      .eq('promotion_id', params.promotionId))
+      .eq('promotion_id', params.promotionId)
+    const productIds = promoProducts?.map(p => p.product_id) ?? []
+    if (productIds.length > 0) {
+      query = query.in('id', productIds)
+    } else {
+      query = query.eq('id', '00000000-0000-0000-0000-000000000000')
+    }
   }
 
   const sortBy = params.sortBy ?? 'created_at'
@@ -225,18 +231,21 @@ export async function getPromotionWithProducts(promotionId: string): Promise<{ p
     throw promoError
   }
 
-  const { data: products, error: prodError } = await supabase
-    .from('products')
-    .select(`
-      *,
-      category:categories(*),
-      images:product_images(*)
-    `)
-    .in('id', supabase
+  const { data: promoProducts } = await supabase
       .from('promotion_products')
       .select('product_id')
-      .eq('promotion_id', promotionId))
-    .is('deleted_at', null)
+      .eq('promotion_id', promotionId)
+    const productIds = promoProducts?.map(p => p.product_id) ?? []
+
+    const { data: products, error: prodError } = await supabase
+      .from('products')
+      .select(`
+        *,
+        category:categories(*),
+        images:product_images(*)
+      `)
+      .in('id', productIds.length > 0 ? productIds : ['00000000-0000-0000-0000-000000000000'])
+      .is('deleted_at', null)
 
   if (prodError) throw prodError
 
