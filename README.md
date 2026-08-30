@@ -171,16 +171,34 @@ Secrets (`secrets`):
 | `SUPABASE_ANON_KEY`            | Public anon key, fallback for the web build    |
 
 > **Token permissions required.** This project deploys a **Cloudflare Worker**
-> (via `wrangler deploy` / OpenNext), **not** a Pages project. A
-> "Cloudflare Pages: Edit" token is **not enough**. The token needs:
+> (via `wrangler deploy` / OpenNext) and a **Pages proxy** that serves that
+> worker on a `.pages.dev` URL. The token needs:
 >
 > - **Account › Worker Scripts › Edit**
 > - **Account › Account Settings › Read** (used by `wrangler whoami` to verify the token)
+> - **Account › Cloudflare Pages › Edit** (used to publish the Pages proxy project)
 > - **Account Resources** must Include the account whose ID matches `CLOUDFLARE_ACCOUNT_ID`
 >
 > S3/R2 access keys (`CLOUDFLARE_ACCESS_KEY`, `CLOUDFLARE_ACCESS_SECRET`,
 > `CLOUDFLARE_S3_API_ENDPOINT`) are **not** used by this pipeline — Worker
 > deploys authenticate with the API token above.
+
+### Serving on a .pages.dev URL
+
+Worker URLs look like `<name>.<random>.workers.dev`. To serve the site on a
+cleaner `<project>.pages.dev` URL instead, the pipeline publishes a Pages proxy
+(in the `pages_proxy` job of the workflow):
+
+The proxy is a Pages project whose only file is a `_redirects` rule:
+
+```
+/* https://<worker-name>.<workers-dev-subdomain>.workers.dev/:splat 200
+```
+
+A `200`-rewrite makes Cloudflare Pages fetch the Worker and serve its content
+while the browser stays on `<project>.pages.dev`. The project is created
+automatically by `wrangler pages deploy` (publish once; supports every route,
+dynamic pages, and API calls).
 
 Variables (`vars`):
 
@@ -188,6 +206,7 @@ Variables (`vars`):
 | ------------------------ | ----------------------------------------------- |
 | `CLOUDFLARE_ACCOUNT_ID`  | Cloudflare account ID                           |
 | `CLOUDFLARE_PROJECT_NAME`| Worker name (defaults to `chezeina`)          |
+| `CLOUDFLARE_PAGES_PROJECT`| Pages proxy project name (defaults to `chezeina`) |
 | `SUPABASE_PROJECT_ID`    | Supabase project reference (the slug in your dashboard URL) |
 
 Secrets never appear in the repository. The web build only receives the
