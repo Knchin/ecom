@@ -187,7 +187,7 @@ Variables (`vars`):
 | Variable                 | Purpose                                         |
 | ------------------------ | ----------------------------------------------- |
 | `CLOUDFLARE_ACCOUNT_ID`  | Cloudflare account ID                           |
-| `CLOUDFLARE_PROJECT_NAME`| Worker name (defaults to `shop-platform`)       |
+| `CLOUDFLARE_PROJECT_NAME`| Worker name (defaults to `chezeina`)          |
 | `SUPABASE_PROJECT_ID`    | Supabase project reference (the slug in your dashboard URL) |
 
 Secrets never appear in the repository. The web build only receives the

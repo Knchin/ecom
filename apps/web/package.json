@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "pnpm --filter=@shop-platform/ui build && pnpm --filter=@shop-platform/config build && pnpm --filter=@shop-platform/types build && next build",
     "build:cf": "pnpm --filter=@shop-platform/ui build && pnpm --filter=@shop-platform/config build && pnpm --filter=@shop-platform/types build && opennextjs-cloudflare build",
-    "deploy:cf": "wrangler deploy --name ${CLOUDFLARE_PROJECT_NAME:-shop-platform}",
+    "deploy:cf": "wrangler deploy --name ${CLOUDFLARE_PROJECT_NAME:-chezeina}",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
     "typecheck": "tsc --noEmit",
