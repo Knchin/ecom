@@ -186,19 +186,31 @@ Secrets (`secrets`):
 ### Serving on a .pages.dev URL
 
 Worker URLs look like `<name>.<random>.workers.dev`. To serve the site on a
-cleaner `<project>.pages.dev` URL instead, the pipeline publishes a Pages proxy
-(in the `pages_proxy` job of the workflow):
+cleaner `<project>.pages.dev` URL instead, the pipeline publishes a **Pages
+proxy** (the `pages_proxy` job): a Pages project whose only file is an
+advanced-mode `_worker.js` that forwards every request to the Worker:
 
-The proxy is a Pages project whose only file is a `_redirects` rule:
+```js
+const WORKER_URL = "https://<worker-name>.<workers-dev-subdomain>.workers.dev";
 
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    const target = WORKER_URL + url.pathname + url.search;
+    const headers = new Headers(request.headers);
+    headers.delete("host");
+    return fetch(target, {
+      method: request.method,
+      headers,
+      body: ["GET", "HEAD"].includes(request.method) ? undefined : request.body,
+    });
+  },
+};
 ```
-/* https://<worker-name>.<workers-dev-subdomain>.workers.dev/:splat 200
-```
 
-A `200`-rewrite makes Cloudflare Pages fetch the Worker and serve its content
-while the browser stays on `<project>.pages.dev`. The project is created
-automatically by `wrangler pages deploy` (publish once; supports every route,
-dynamic pages, and API calls).
+The browser stays on `<project>.pages.dev` while the Worker (the source of
+truth) renders every route — dynamic pages and API calls included. The project
+is created automatically by the pipeline (`PROJECT_NAME: Cloudflare Pages`).
 
 Variables (`vars`):
 

@@ -196,18 +196,35 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'chezeina' }}
 
-      - name: Publish Pages proxy
+      - name: Publish Pages proxy (worker-based)
         run: |
-          WORKER_NAME="${CLOUDFLARE_PROJECT_NAME:-chezeina}"
           PAGES_PROJECT="${CLOUDFLARE_PAGES_PROJECT:-chezeina}"
+          WORKER_NAME="${CLOUDFLARE_PROJECT_NAME:-chezeina}"
           SUBDOMAIN="$(curl -fsSL -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain" \
             | jq -r '.result.subdomain')"
-          echo "proxy target: https://${WORKER_NAME}.${SUBDOMAIN}.workers.dev"
+          WORKER_URL="https://${WORKER_NAME}.${SUBDOMAIN}.workers.dev"
+          echo "proxy target: ${WORKER_URL}"
           mkdir -p /tmp/pages-proxy
-          printf '/* https://%s.%s.workers.dev/:splat 200\n' "$WORKER_NAME" "$SUBDOMAIN" > /tmp/pages-proxy/_redirects
-          echo "--- _redirects ---"
-          cat /tmp/pages-proxy/_redirects
+          cat > /tmp/pages-proxy/_worker.js <<_PAGES_JS_
+const WORKER_URL = "${WORKER_URL}";
+
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    const target = WORKER_URL + url.pathname + url.search;
+    const headers = new Headers(request.headers);
+    headers.delete("host");
+    return fetch(target, {
+      method: request.method,
+      headers,
+      body: ["GET", "HEAD"].includes(request.method) ? undefined : request.body,
+    });
+  },
+};
+_PAGES_JS_
+          echo "--- _worker.js ---"
+          cat /tmp/pages-proxy/_worker.js
           pnpm exec wrangler pages deploy /tmp/pages-proxy --project-name "$PAGES_PROJECT" --branch main
         working-directory: apps/web
         env:
@@ -218,9 +235,10 @@ jobs:
 
       - name: Smoke test chezeina.pages.dev
         run: |
-          sleep 10
-          code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 45 "https://${CLOUDFLARE_PAGES_PROJECT:-chezeina}.pages.dev/")"
-          echo "::notice::https://${CLOUDFLARE_PAGES_PROJECT:-chezeina}.pages.dev/ -> HTTP ${code}"
+          sleep 15
+          PAGES_URL="https://${CLOUDFLARE_PAGES_PROJECT:-chezeina}.pages.dev/"
+          code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 45 "$PAGES_URL")"
+          echo "::notice::$PAGES_URL -> HTTP ${code}"
           if [ "$code" != "200" ]; then
             echo "::error::pages.dev is not serving the app (HTTP $code). Review the 'Publish Pages proxy' log above."
             exit 1
