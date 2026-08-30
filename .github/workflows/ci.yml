@@ -186,10 +186,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Pages project (if missing)
+      - name: Configure Pages project
         run: |
           PAGES_PROJECT="${CLOUDFLARE_PAGES_PROJECT:-chezeina}"
-          pnpm exec wrangler pages project create "$PAGES_PROJECT" --production-branch main >/dev/null 2>&1 || true
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects"
+          AUTH="Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
+          JSON="Content-Type: application/json"
+          curl -fsSL -X POST "$API" -H "$AUTH" -H "$JSON" \
+            --data "{\"name\":\"$PAGES_PROJECT\",\"production_branch\":\"main\"}" \
+            -o /dev/null -w "create http=%{http_code}\n" || true
+          curl -fsSL -X PATCH "$API/$PAGES_PROJECT" -H "$AUTH" -H "$JSON" \
+            --data '{"production_branch":"main"}' | jq -r '"production_branch=" + (.result.production_branch // "?")'
+          curl -fsSL "$API/$PAGES_PROJECT" -H "$AUTH" \
+            | jq -r '"bound_domains=" + ((.result.domains // []) | join(","))'
         working-directory: apps/web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -226,6 +235,8 @@ _PAGES_JS_
           echo "--- _worker.js ---"
           cat /tmp/pages-proxy/_worker.js
           pnpm exec wrangler pages deploy /tmp/pages-proxy --project-name "$PAGES_PROJECT" --branch main
+          echo "--- recent deployments ---"
+          pnpm exec wrangler pages deployment list --project-name "$PAGES_PROJECT" | head -20
         working-directory: apps/web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
