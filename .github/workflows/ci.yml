@@ -12,8 +12,12 @@ env:
 
 # Pipeline:
 #   push / PR → ci (install → common build → typecheck → tests)
-#             → build (OpenNext worker + wrangler --dry-run, upload artifact)
-#   main only → deploy (download artifact, validate token, wrangler deploy)
+#             → build (OpenNext worker + wrangler --dry-run + artifact upload)
+#   main only → deploy (rebuilds worker from this commit, validates token, deploys)
+#
+# The deploy job builds its own bundle instead of relying on the GitHub
+# cross-job artifact service (which has been flaky here), but still runs
+# after `build` succeeds so broken code never deploys.
 #
 # Supabase migrations are NOT deployed by CI: they are applied manually
 # in the Supabase SQL editor.
@@ -119,19 +123,21 @@ jobs:
         run: |
           [ -n "${{ vars.CLOUDFLARE_ACCOUNT_ID }}" ] || { echo "::error::Missing 'CLOUDFLARE_ACCOUNT_ID' repository variable"; exit 1; }
           [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] || { echo "::error::Missing 'CLOUDFLARE_API_TOKEN' repository secret"; exit 1; }
+          [ -n "${{ vars.SUPABASE_PROJECT_ID }}" ] || { echo "::error::Missing 'SUPABASE_PROJECT_ID' repository variable"; exit 1; }
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download worker artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: opennext-worker
-          path: apps/web/.open-next
+      - name: Build Cloudflare worker
+        run: pnpm --filter=web build:cf
+        env:
+          # Public (browser-safe) values only; no privileged Supabase keys here.
+          NEXT_PUBLIC_SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_ID }}.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
 
-      - name: Verify downloaded worker bundle
+      - name: Verify worker bundle
         run: |
-          test -f .open-next/worker.js || { echo "::error::Downloaded artifact missing .open-next/worker.js"; exit 1; }
+          test -f .open-next/worker.js || { echo "::error::OpenNext build did not produce .open-next/worker.js"; exit 1; }
         working-directory: apps/web
 
       - name: Validate Cloudflare token

@@ -150,9 +150,10 @@ push / pull_request (any branch)             push to main
   typecheck → unit tests) then `build` (OpenNext worker build + `wrangler
   deploy --dry-run` + artifact upload). Broken code is caught before merge; no
   deployments happen.
-- **`main` pushes**: after `ci` and `build` pass, `deploy` downloads the built
-  artifact, validates the Cloudflare token, and deploys (tracked against the
-  `production` environment). Deployments never run from arbitrary branches.
+- **`main` pushes**: after `ci` and `build` pass, `deploy` rebuilds the worker
+  from that commit (deployment never depends on GitHub's cross-job artifact
+  service), validates the Cloudflare token, and deploys — tracked against the
+  `production` environment. Deployments never run from arbitrary branches.
 - **Supabase is not deployed by CI**: migrations are applied manually in the
   Supabase SQL editor (or the Supabase Studio). No DB credentials are needed
   in GitHub.
@@ -165,9 +166,21 @@ Secrets (`secrets`):
 
 | Secret                         | Purpose                                        |
 | ------------------------------ | ---------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`         | Cloudflare token (Workers Scripts edit)        |
+| `CLOUDFLARE_API_TOKEN`         | Cloudflare token (see permissions below)       |
 | `SUPABASE_PUBLISHABLE_KEY`     | Public publishable key (browser-safe)          |
 | `SUPABASE_ANON_KEY`            | Public anon key, fallback for the web build    |
+
+> **Token permissions required.** This project deploys a **Cloudflare Worker**
+> (via `wrangler deploy` / OpenNext), **not** a Pages project. A
+> "Cloudflare Pages: Edit" token is **not enough**. The token needs:
+>
+> - **Account › Worker Scripts › Edit**
+> - **Account › Account Settings › Read** (used by `wrangler whoami` to verify the token)
+> - **Account Resources** must Include the account whose ID matches `CLOUDFLARE_ACCOUNT_ID`
+>
+> S3/R2 access keys (`CLOUDFLARE_ACCESS_KEY`, `CLOUDFLARE_ACCESS_SECRET`,
+> `CLOUDFLARE_S3_API_ENDPOINT`) are **not** used by this pipeline — Worker
+> deploys authenticate with the API token above.
 
 Variables (`vars`):
 
