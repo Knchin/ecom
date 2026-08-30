@@ -126,27 +126,33 @@ supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>
 Source of truth: `.github/workflows/ci.yml`.
 
 ```
-merge_request / push (any branch)            push to main
+push / pull_request (any branch)             push to main
         │                                        │
         ▼                                        ▼
    ┌─────────────┐                    ┌─────────────┐
    │  ci         │  ───────────────►  │  ci         │
-   └─────────────┘                    └──────┬──────┘
-   (install, build, typecheck, tests)       ▼
-                                    ┌──────────────────┐
-                                    │  cloudflare_deploy│
-                                    │      main only   │
-                                    └────────┬─────────┘
-                                             ▼
-                                    build + deploy worker
+   │  Validate   │                    └──────┬──────┘
+   └──────┬──────┘                           ▼
+          ▼                          ┌─────────────┐
+   ┌─────────────┐                   │  build      │
+   │  build      │  ───────────────► │  Build      │
+   │  Worker     │                   └──────┬──────┘
+   └─────────────┘                          ▼
+   (dry-run + artifact)             ┌─────────────┐
+                                    │  deploy     │
+                                    │  Cloudflare │
+                                    └──────┬──────┘
+                                           ▼
+                                   (main only)
 ```
 
-- **Pull requests / feature branches**: the `ci` job runs install (frozen
-  lockfile) → common packages build → typecheck → unit tests. Broken code is
-  caught before merge; no deployments happen.
-- **`main` pushes**: once `ci` passes, `cloudflare_deploy` builds the OpenNext
-  worker from that commit and deploys it (tracked against the `production`
-  environment). Deployments never run from arbitrary branches.
+- **Pull requests / feature branches**: `ci` (install → common packages build →
+  typecheck → unit tests) then `build` (OpenNext worker build + `wrangler
+  deploy --dry-run` + artifact upload). Broken code is caught before merge; no
+  deployments happen.
+- **`main` pushes**: after `ci` and `build` pass, `deploy` downloads the built
+  artifact, validates the Cloudflare token, and deploys (tracked against the
+  `production` environment). Deployments never run from arbitrary branches.
 - **Supabase is not deployed by CI**: migrations are applied manually in the
   Supabase SQL editor (or the Supabase Studio). No DB credentials are needed
   in GitHub.
